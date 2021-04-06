@@ -1,0 +1,4 @@
+This directory is at this point exclusively for the output of SLURM clients or
+servers. The slurm directory is where the output of SLURM clients is logged. The
+PoolLog directory houses logs from the server. Individual clients will write to
+their own copy of the slurm directory.
