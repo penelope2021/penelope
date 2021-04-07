@@ -1,3 +1,8 @@
+/**
+ * This file contains the loop for the power pool as well as the main method
+ * which spawns all the threads
+ */
+
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <assert.h>
@@ -9,6 +14,7 @@
 
 void *server_thread(void *args);
 
+// function managing the power pool
 void *server_thread(void *args)
 {
     printf("starting server\n");
@@ -17,10 +23,7 @@ void *server_thread(void *args)
     int rc = zmq_bind(responder, "tcp://*:1600");
     assert(rc == 0);
 
-    // zmq_pollitem_t items[1];
-    // items[0].socket = responder;
-    // items[0].events = ZMQ_POLLIN;
-
+    // use poll to avoid infinitely waiting for messages
     zmq_pollitem_t items[] = {
         {responder, 0, ZMQ_POLLIN, 0}
     };
@@ -40,20 +43,24 @@ void *server_thread(void *args)
             }
             power_exchange_msg_t *request = (power_exchange_msg_t *)zmq_msg_data(&req_msg);
             zmq_msg_close(&req_msg);
+            // check for power
             double power_to_give = 0.0f;
             for (int i = 0; i < 2; i++)
             {
                 pthread_mutex_lock(&cpu_list[i].lock);
                 if (cpu_list[i].available_power > 0)
                 {
-                    // power_exchanged initially represents the necessary power (proxy for urgency)
+                    // power_exchanged initially represents the necessary power if the request is urgent
+                    // calculate the amount that we can draw from the pool
                     double max_size = max_transaction_amount(cpu_list[i].available_power, request->power_exchanged);
                     double delta_power = (cpu_list[i].available_power < max_size) ? cpu_list[i].available_power : max_size;
+                    // add the transaction amount and subtract it from the pool
                     power_to_give += delta_power;
                     cpu_list[i].available_power -= delta_power;
                 }
                 else 
                 {
+                    // induce the local node to give up power
                     if (request->urgency && !cpu_list[i].urgency)
                     {
                         cpu_list[i].release_power = true;
@@ -81,12 +88,13 @@ int main(int argc, char *argv[])
         exit(-1);
     }
 
-    char *hostfilename = argv[1];
-    int num_hosts = atoi(argv[2]);
-    double powercap = atof(argv[3]);
+    char *hostfilename = argv[1]; // filename with host IPs
+    int num_hosts = atoi(argv[2]); // length of hostfile
+    double powercap = atof(argv[3]); // initial powercap
     char *cur_host = argv[4]; // IP of current node. to ensure node doesn't make spurious requests to itself
 
-    char **hosts = malloc(sizeof(char*) * (num_hosts - 1));
+    // we do not allocate a space for ourselves, since we handle self-queries internally, rather than through the network
+    char **hosts = malloc(sizeof(char*) * (num_hosts - 1)); 
     int count = 0;
     FILE *hostfile = fopen(hostfilename, "r");
     if (hostfile == NULL)
@@ -96,6 +104,7 @@ int main(int argc, char *argv[])
     }
 
     size_t n;
+    // get all hosts except for ourselves
     while ((count < (num_hosts - 1)) && (getline(&hosts[count], &n, hostfile) != -1))
     {
         int len = strlen(hosts[count]);
@@ -126,20 +135,11 @@ int main(int argc, char *argv[])
     void *wait_for_power_pool = zmq_socket(shared_ctx->context, ZMQ_REP);
     int rc = zmq_bind(wait_for_power_pool, "tcp://*:1111");
     assert(rc == 0);
-    // char start[15];
-    // int nbytes = zmq_recv(wait_for_power_pool, (void*)start, 15, 0);
-    // if (nbytes == -1)
-    // {
-    //     fprintf(stderr, "error waiting on signal socket used to start power pool\n");
-    //     exit(-1);
-    // }
-    // zmq_send(wait_for_power_pool, "ack", 3, 0);
-    // start[nbytes] = '\0';
-    // double powercap = atof(start);
 
     printf("beginning power pool\n");
     update_powercap(shared_ctx, powercap);
 
+    // creates all the contexts and spawns the local decider and power pool
     server_ctx_t *server_ctx = init_server(shared_ctx);
     client_ctx_t *client_ctx = init_client_ctx(shared_ctx, power_ctx, hosts, cur_host, (num_hosts-1));
 
@@ -155,6 +155,7 @@ int main(int argc, char *argv[])
     }
 
     char end[15];
+    // main thread waits for socket to receive message that its time to exit
     if (zmq_recv(wait_for_power_pool, (void*)end, 15, 0) == -1)
     {
         fprintf(stderr, "error waiting on signal socket used to kill power pool\n");
@@ -162,6 +163,8 @@ int main(int argc, char *argv[])
     }
     zmq_send(wait_for_power_pool, "ack", 3, 0);
 
+    // when it receives a message, it sets these break flags which the decider
+    // and power pool check, to trigger a graceful shutdown
     shared_ctx->dying = true;
     power_ctx->dying = true;
 

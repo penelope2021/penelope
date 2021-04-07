@@ -1,10 +1,10 @@
 import os,sys,math,subprocess,time,socket,math
 import datetime
 
-powercap=int(float(sys.argv[1]))
-server_name=str(sys.argv[2])
-client_id=int(sys.argv[3])
-id_list=[str(2*client_id), str(2*client_id +1)]
+powercap=int(float(sys.argv[1])) # initial cap
+server_name=str(sys.argv[2]) # server ip
+client_id=int(sys.argv[3]) 
+id_list=[str(2*client_id), str(2*client_id +1)] # one client id per socket
 server_address = (server_name, 10000)
 
 cpu_list=[]
@@ -20,13 +20,10 @@ minimum_power_cap=30.0
 LOG_FLAG = 1
 cpu_files = []
 if LOG_FLAG:
-    # LOG_file = open("/home/cc/penelope/data/slurm/ClientLog_"+ str(int(time.time())), 'w')
     LOG_file = open("/home/cc/slurm_output_"+ str(powercap), 'w')
 
 cpu_files.append(open("/home/cc/slurm_core1_"+str(powercap)+".csv", 'w'))
 cpu_files.append(open("/home/cc/slurm_core2_"+str(powercap)+".csv", 'w'))
-# launch power monitor
-#os.system("sudo /home/cc/PowerShift/tool/RAPL/RaplPowerMonitor &")
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -64,6 +61,7 @@ def ReadPower():
     power2 = power2/len(Powerlist)
     return nowtime,power1,power2
 
+# Assign node-level power cap
 def SetPower(index,power):
     if index ==0:
         os.system("sudo /home/cc/penelope/tools/RAPL/RaplSetPower "+str(power)+" 0 >/dev/null")
@@ -98,9 +96,6 @@ while(END_signal !=1):
         if cpu_list[i].current_power < 0 or cpu_list[i].current_power > 200:
             break
         actual_get_power,release_power=0,0
-        # print nowtime,cpu_list[i].current_power,cpu_list[i].current_power_limit
-
-        # print time, current power, current cap per core
         printstr =  str(nowtime) + "," + str(cpu_list[i].current_power) + "," + str(cpu_list[i].current_power_limit) + "\n"
         cpu_files[i].write(printstr)
         cpu_files[i].flush()
@@ -120,7 +115,6 @@ while(END_signal !=1):
             msg =str(extra_power)+','+str(cpu_list[i].urgent)+',' + id_list[i]+',0'
             if LOG_FLAG:
                 LOG_file.write(str(datetime.datetime.now()) + ' message sent: extra power =' + str(extra_power) + ', urgent flag = 0, current_power = ' + str(cpu_list[i].current_power) + ', current_power_limit = ' + str(cpu_list[i].current_power_limit) + ', initial_power_limit = ' +  str(cpu_list[i].initial_power_limit) + '\n')
-            #sock.send(msg)
             try:
                 sock.send(msg)
                 return_value = sock.recv(1024)
@@ -144,14 +138,12 @@ while(END_signal !=1):
                     break
                 return_value = sock.recv(1024)
                 
-        #elif cpu_list[i].current_power > cpu_list[i].current_power_limit - power_margin * 0.5:
         else:
             #need power
             if cpu_list[i].current_power_limit >= cpu_list[i].initial_power_limit:
                 #not necessary, check if need_power file is 0, if not get power from extra
                 cpu_list[i].urgent=0
                 msg ='0'+','+'0'+','+id_list[i]+',0'
-                #sock.send(msg)
                 if LOG_FLAG:
                     LOG_file.write(str(datetime.datetime.now()) + ' message sent: extra power = 0, urgent flag = 0, current_power = ' + str(cpu_list[i].current_power) + ', current_power_limit = ' + str(cpu_list[i].current_power_limit) + ', initial_power_limit = ' +  str(cpu_list[i].initial_power_limit)+ '\n')
                 
@@ -208,48 +200,15 @@ while(END_signal !=1):
                     cpu_list[i].next_power_limit = cpu_list[i].current_power_limit + actual_get_power
                     SetPower(i,cpu_list[i].next_power_limit)
                     cpu_list[i].current_power_limit =cpu_list[i].next_power_limit
-        # else:
-        #     print 'stable state'
-        #     cpu_list[i].urgent=0
-        #     msg ='0'+','+'2'+','+id_list[i]+',0'
-        #     if LOG_FLAG:
-        #         LOG_file.write(str(datetime.datetime.now()) + ' message sent: extra power = 0, urgent flag = 2, current_power = ' + str(cpu_list[i].current_power) + ', current_power_limit = ' + str(cpu_list[i].current_power_limit) + ', initial_power_limit = ' +  str(cpu_list[i].initial_power_limit)+ '\n')
-
-        #     try:
-        #         sock.send(msg)
-        #         return_value = sock.recv(1024)
-        #         actual_get_power=float(return_value.split(',')[0])
-        #         release_power=int(return_value.split(',')[1])
-        #     except:
-        #         sock.close()
-        #         break
-        #     if release_power == 1 and cpu_list[i].current_power_limit  > cpu_list[i].initial_power_limit:
-        #         # return to initital power limit
-        #         available_release_power= cpu_list[i].current_power_limit - cpu_list[i].initial_power_limit
-        #         cpu_list[i].current_power_limit = cpu_list[i].initial_power_limit
-        #         SetPower(i,cpu_list[i].current_power_limit)
-        #         msg =str(available_release_power)+','+'0'+','+id_list[i]+',0'
-        #         #sock.send(msg)
-        #         if LOG_FLAG:
-        #             LOG_file.write('Trying to release power: available_release_power = ' + str(available_release_power)+ '\n')
-        #         try:
-        #             sock.send(msg)
-        #         except:
-        #             sock.close()
-        #             break
-        #         return_value = sock.recv(1024)
 
     if cpu_list[0].urgent ==1 or cpu_list[1].urgent==1:
         frequency = half_frequency
     else:
         frequency = default_frequency
-    #if os.path.isfile('/mnt/signal/END'):
     if os.path.isfile('/home/cc/END_SLURM'):
         END_signal = 1
 
-#reset power cap and kill the power monitor
-# os.system('sudo pkill rapl;sudo /home/cc/penelope/tools/RAPL/RaplSetPower 125 125 >/dev/null')
-#runtime_info.close()
+# clean up files and close socket
 LOG_file.flush()
 cpu_files[0].flush()
 cpu_files[1].flush()

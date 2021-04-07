@@ -12,7 +12,7 @@ take_power_unit=2
 break_signal = 0
 server_ip = str(sys.argv[1])
 
-'This is a deterministic way to break the server after N iterations'
+# Break the server after N iterations
 max_iterations = int(sys.argv[2])
 iteration = 0
 
@@ -57,7 +57,6 @@ while inputs and break_signal != 1 and iteration < max_iterations:
     # do this at the beginning to make it easier to see
     iteration += 1
 
-    # if os.path.isfile('/exports/example/signal/END'):
     if os.path.isfile('/home/cc/END_SLURM'):
         break_signal = 1
         if LOG_FLAG:

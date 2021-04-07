@@ -10,6 +10,10 @@
 
 void *server_thread(void *args);
 
+/**
+ * This now keeps track of how much power was doled out over time, to track
+ * power redistribution time (logs when the whole local pool is depleted).
+ */
 void *server_thread(void *args)
 {
     printf("starting server\n");
@@ -129,10 +133,10 @@ int main(int argc, char *argv[])
     int num_hosts = atoi(argv[2]);
     double powercap = atof(argv[3]);
     char *cur_host = argv[4]; // IP of current node. to ensure node doesn't make spurious requests to itself
-    char *port = argv[5];
-    int r = atoi(argv[6]);
-    int id = atoi(argv[7]);
-    int frequency = atoi(argv[8]); // time in milliseconds for sleeping time
+    char *port = argv[5]; // Because we have multiple nodes on one 1 IP, we need distinct ports for each penelope instance
+    int r = atoi(argv[6]); // runtime. how long decider runs before "idling"
+    int id = atoi(argv[7]); // client id
+    int frequency = atoi(argv[8]); // period in milliseconds for decider iteration
 
     char host_port[BUFSIZ];
     sprintf(host_port, "%s:%s", cur_host, port);
@@ -169,58 +173,21 @@ int main(int argc, char *argv[])
     power_ctx_t *power_ctx = init_power_ctx(2);
     shared_ctx_t *shared_ctx = init_shared(id);
 
-    // if (pthread_create(&shared_ctx->power_reader, NULL, read_power, (void*)power_ctx) != 0)
-    // {
-    //     fprintf(stderr, "failed to create server thread\n");
-    //     exit(-1);
-    // }
-
-    // void *wait_for_power_pool = zmq_socket(shared_ctx->context, ZMQ_REP);
-    // int rc = zmq_bind(wait_for_power_pool, "tcp://*:1111");
-    // assert(rc == 0);
-
-    // char start[15];
-    // int nbytes = zmq_recv(wait_for_power_pool, (void*)start, 15, 0);
-    // if (nbytes == -1)
-    // {
-    //     fprintf(stderr, "error waiting on signal socket used to start power pool\n");
-    //     exit(-1);
-    // }
-    // zmq_send(wait_for_power_pool, "ack", 3, 0);
-    // start[nbytes] = '\0';
-    // double powercap = atof(start);
-
     printf("beginning power pool\n");
     update_powercap(shared_ctx, powercap);
 
     server_ctx_t *server_ctx = init_server(shared_ctx, port);
     client_ctx_t *client_ctx = init_client_ctx(shared_ctx, power_ctx, hosts, cur_host, (num_hosts-1), runtime, frequency);
 
-    // if (pthread_create(&shared_ctx->server, NULL, server_thread, (void *)server_ctx) != 0)
-    // {
-    //     fprintf(stderr, "failed to create server thread\n");
-    //     exit(-1);
-    // }
     if (pthread_create(&shared_ctx->client, NULL, client_thread, (void *)client_ctx) != 0)
     {
         fprintf(stderr, "failed to create server thread\n");
         exit(-1);
     }
 
-    // char end[15];
-    // if (zmq_recv(wait_for_power_pool, (void*)end, 15, 0) == -1)
-    // {
-    //     fprintf(stderr, "error waiting on signal socket used to kill power pool\n");
-    //     exit(-1);
-    // }
-    // zmq_send(wait_for_power_pool, "ack", 3, 0);
-
-    // shared_ctx->dying = true;
-    // power_ctx->dying = true;
-
-    // pthread_join(shared_ctx->power_reader, NULL);
-    // pthread_join(shared_ctx->server, NULL);
-    // pthread_join(shared_ctx->client, NULL);
+    // to reduce thread overhead, we have the power pool thread also handle
+    // checking for a certain file at which point it sets the dying flag and
+    // pthread_join's on the decider thread.
     server_thread((void*)server_ctx);
 
     return 0;

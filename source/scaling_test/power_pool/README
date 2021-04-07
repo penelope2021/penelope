@@ -1,0 +1,5 @@
+The major differences here are in the main method (more parameters) and in APIs.
+We destroy the power reader thread and instead have a read_power function which
+returns value based on the time since launch. It returns whatever the current
+cap is until a certain time threshold is met, at which point it returns below
+the minimum allowed cap to mock as though it is "idling". 

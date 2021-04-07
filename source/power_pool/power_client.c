@@ -1,3 +1,7 @@
+/**
+ * Contains all code needed for the local decider's operation
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -15,7 +19,7 @@
 
 #define DEFAULT_FREQUENCY 2
 #define HALF_FREQUENCY 2
-#define POWER_MARGIN 3
+#define POWER_MARGIN 3 // margin used to determine if a node is power-hungry or has excess
 #define HALF_POWER_MARGIN 1
 #define MINIMUM_POWER_CAP 30.0
 #define MAX_TRANSACTION_AMT 30
@@ -42,6 +46,10 @@ cpu_t create_cpu_t(int id, double powercap)
     return ret;
 }
 
+// computes how much power we can draw from a pool with the given size
+// if necessary power is non-zero, we've received an urgent request and we give
+// out however much power is necessary. Power pool makes sure we don't overdraw
+// else we return 10% of the pool_size, max of 30, min of 1
 double max_transaction_amount(double pool_size, double necessary_power)
 {
     if (necessary_power > 0)
@@ -61,6 +69,8 @@ double max_transaction_amount(double pool_size, double necessary_power)
     }
 }
 
+// Atomically gets power readings from circular buffer defined in rapl.h/c
+// Avergaes over last 2 seconds of power readings
 double get_power_reading(power_ctx_t *ctx, cpu_t *cpu_list)
 {
     long double power1 = 0;
@@ -88,6 +98,9 @@ double get_power_reading(power_ctx_t *ctx, cpu_t *cpu_list)
     return (double)nowtime;
 }
 
+// Syscalls to RAPL executable to set poweraps for a given socket
+// "power" is a variable indicating the powercap to be set, 
+// "id" is the socket (0 or 1)
 void set_power(int id, double power)
 {
     char cmd[BUFSIZ];
@@ -107,6 +120,7 @@ void set_power(int id, double power)
     }
 }
 
+// Compute how much excess we have
 double calc_extra_power(double current_power_limit, double current_power)
 {
     if (current_power <= MINIMUM_POWER_CAP)
@@ -115,10 +129,12 @@ double calc_extra_power(double current_power_limit, double current_power)
         return (current_power_limit - current_power - POWER_MARGIN * 0.5);
 }
 
+// Randomly choose a node and query their power pool for power. If urgent,
+// set flag and provide non-zero necessary_power. Else necessary_power should be 0
 power_exchange_msg_t *send_power_request(client_ctx_t *data, void *socket, bool urgency, double necessary_power)
 {
     int rc, n;
-    uint32_t index = arc4random_uniform(data->len);
+    uint32_t index = arc4random_uniform(data->len); // uniform random query
     assert(index < data->len);
     #ifdef VERBOSE
     printf("sending message to %i, %s\n", index, data->hosts[index]);
@@ -142,8 +158,6 @@ power_exchange_msg_t *send_power_request(client_ctx_t *data, void *socket, bool 
 
     if (n == sizeof(request))
     {
-        // int timeout = 1000;
-        // zmq_setsockopt(socket, ZMQ_RCVTIMEO, &timeout, sizeof(timeout));
         zmq_msg_init(&rec_msg);
         int rc2 = zmq_msg_recv(&rec_msg, socket, 0);
         rc = zmq_disconnect(socket, endpoint); assert(rc == 0);
@@ -171,12 +185,12 @@ void *client_thread(void *args)
     zmq_setsockopt(sender, ZMQ_RCVTIMEO, &timeout, sizeof(timeout));
 
     cpu_t *cpu_list = data->ctx->cpus;
-    // pcm_t *pcm = data->pcm;
-    // power_ipc_list_t *ipc_list = data->list;
 
+    // make sure that initial caps are set
     set_power(0, cpu_list[0].initial_power_limit);
     set_power(1, cpu_list[1].initial_power_limit);
 
+    // Files for each core to print logs to
     char core1_filename[BUFSIZ], core2_filename[BUFSIZ];
     sprintf(core1_filename, "/home/cc/penelope_core1_%g.csv", cpu_list[0].initial_power_limit);
     sprintf(core2_filename, "/home/cc/penelope_core2_%g.csv", cpu_list[0].initial_power_limit);
@@ -187,9 +201,8 @@ void *client_thread(void *args)
 
     while (!data->ctx->dying)
     {
-        // pcm->pcm_c_start();
+        // sleep phase of the control loop
         sleep(frequency);
-        // pcm->pcm_c_stop();
 
         frequency = DEFAULT_FREQUENCY;
         double nowtime = get_power_reading(power_ctx, cpu_list);
@@ -201,39 +214,24 @@ void *client_thread(void *args)
             {
                 break;
             }
-            
-	        // int lcore_id = i;
-            // double instrs = (double)pcm->pcm_c_get_instr(lcore_id);
-            // double cycles = (double)pcm->pcm_c_get_cycles(lcore_id);
-            // double ipc = instrs / cycles;
 
-	        // printf("C:%f I:%f, IPC:%3.2f\n",
-            //     instrs,
-            //     cycles,
-            //     ipc);
-
-            // if (ipc <= 0) // unsure if I want to do this
-            //     break;
-            
-            // per socket, file with time, ipc, powercap for graphing
-            double ipc = -1.0;
+            double ipc = -1.0; // legacy, needed to keep this format of 4 numbers for log analysis functions
             fprintf(core_files[i], "%f,%f,%f,%f\n", 
                     nowtime, 
                     ipc, 
                     cpu_list[i].current_power,
                     cpu_list[i].current_power_limit);
 
-            // insert_node(cpu_list[i].current_power_limit, ipc, ipc_list);
-
-            bool exempt_from_release = false;
+            bool exempt_from_release = false; // flag indicating that it doesn't need to release power bc of an urgent request
             #ifdef VERBOSE
             printf("power: %f, cap: %f\n", 
                     cpu_list[i].current_power,
                     cpu_list[i].current_power_limit);
             #endif
+            // Case 1: Excess power
             if (cpu_list[i].current_power < cpu_list[i].current_power_limit - POWER_MARGIN)
             {
-                // post extra power
+                // compute extra power, lower cap first by corresponding amount
                 double extra_power = calc_extra_power(cpu_list[i].current_power_limit, cpu_list[i].current_power);
                 if (extra_power > 0)
                 {
@@ -243,6 +241,8 @@ void *client_thread(void *args)
                     exempt_from_release = true; // don't need to release more if we've already released
                 }
 
+                // acquire lock for socket info, set metadata and add excess to
+                // available_power
                 pthread_mutex_lock(&cpu_list[i].lock);
                 cpu_list[i].class = 1;
                 cpu_list[i].urgency = false;
@@ -258,19 +258,19 @@ void *client_thread(void *args)
                 printf("Under powercap. extra_power: %f\n", extra_power);
                 #endif
             } 
-            // else if (cpu_list[i].current_power > cpu_list[i].current_power_limit - POWER_MARGIN * 0.5)
+            // Case 2: Power-hungry
             else
             {
-                // need power
+                // not necessary; randomly request power, but with no urgency
+                // also will yield power to requesting threads
                 if (cpu_list[i].current_power_limit >= cpu_list[i].initial_power_limit)
                 {
-                    // not necessary; randomly request power, but with no urgency
-                    // also will yield power to requesting threads
                     pthread_mutex_lock(&cpu_list[i].lock);
                     cpu_list[i].urgency = false;
                     cpu_list[i].class = 3;
                     pthread_mutex_unlock(&cpu_list[i].lock);
 
+                    // First check local pool for power
                     double received_power = 0.0f;
                     for (int j = 0; j < 2; j++)
                     {
@@ -282,13 +282,15 @@ void *client_thread(void *args)
                         pthread_mutex_unlock(&cpu_list[j].lock);
                     }
 
+                    // If no excess locally, query an external node
                     if (received_power == 0)
                     {
                         // make request
                         power_exchange_msg_t *response = send_power_request(data, sender, false, 0);
                         received_power = (response != NULL) ? response->power_exchanged : 0;
                     }
-
+                    // If either local or external query returned power, raise
+                    // our cap
                     if (received_power > 0)
                     {
                         cpu_list[i].next_power_limit = cpu_list[i].current_power_limit + received_power;
@@ -313,7 +315,9 @@ void *client_thread(void *args)
                     cpu_list[i].urgency = true;
                     cpu_list[i].class = 3;
                     pthread_mutex_unlock(&cpu_list[i].lock);
-
+                    
+                    // First check locally. If nothing available, send an urgent
+                    // request 
                     double received_power = 0.0f;
                     for (int j = 0; j < 2; j++)
                     {
@@ -338,10 +342,10 @@ void *client_thread(void *args)
                         set_power(i, cpu_list[i].next_power_limit);
                         cpu_list[i].current_power_limit = cpu_list[i].next_power_limit;
                     }
-
+                    // If still urgent, we're exempt from releasing power
+                    // induced by other urgent requests
                     if (received_power < necessary_power)
                     {
-                        frequency = HALF_FREQUENCY;
                         exempt_from_release = true; // still urgently need power. our urgency overrides
                     }
                     #ifdef VERBOSE
@@ -353,18 +357,11 @@ void *client_thread(void *args)
                     #endif
                 }
             }
-            // else
-            // {
-            //     // basically do nothing; stable state. will yield to urgency, nothing else.
-            //     #ifdef VERBOSE
-            //     printf("stable state\n");
-            //     #endif
-            //     pthread_mutex_lock(&cpu_list[i].lock);
-            //     cpu_list[i].urgency = false;
-            //     cpu_list[i].class = 2;
-            //     pthread_mutex_unlock(&cpu_list[i].lock);
-            // }
 
+            // If the local pool has received an urgent request, the decider is
+            // not in a state that is exempt from release, and the node is above
+            // its initial cap, it lowers its cap to the initial setting, and
+            // adds the excess to its local power pool.
             pthread_mutex_lock(&cpu_list[i].lock);
             if (!exempt_from_release && 
                 cpu_list[i].release_power &&
@@ -376,29 +373,6 @@ void *client_thread(void *args)
                 set_power(i, cpu_list[i].current_power_limit);
                 cpu_list[i].available_power += extra_power;
                 cpu_list[i].release_power = false;
-
-                // #ifdef VERBOSE
-                // printf("releasing power\n");
-                // #endif
-                // power_ipc_node_t *lower_level = lookup(cpu_list[i].current_power_limit, ipc_list);
-                // if (lower_level != NULL)
-                // {
-                //     #ifdef VERBOSE
-                //     printf("lookup succeeded\n");
-                //     #endif
-                //     double percent_diff = (ipc - lower_level->ipc) / ipc; 
-                //     if (percent_diff <= 0.05)
-                //     {
-                //         double extra_power = cpu_list[i].current_power_limit - lower_level->powercap;
-                //         cpu_list[i].current_power_limit = cpu_list[i].current_power_limit - extra_power;
-                //         set_power(i, cpu_list[i].current_power_limit);
-                //         cpu_list[i].available_power += extra_power;
-                //         cpu_list[i].release_power = false;
-                //     }
-                //     #ifdef VERBOSE
-                //     printf("power: %f, ipc: %f\n", lower_level->powercap, lower_level->ipc);
-                //     #endif
-                // }
             }
             pthread_mutex_unlock(&cpu_list[i].lock);
         }

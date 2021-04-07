@@ -1,3 +1,9 @@
+/**
+ * Only commenting differences between this and the standard power pool
+ * Big Picture: we no longer randomly query because there are no other nodes in
+ * an overhead test. We do allow for inter-socket sharing.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -172,8 +178,6 @@ void *client_thread(void *args)
     zmq_setsockopt(sender, ZMQ_RCVTIMEO, &timeout, sizeof(timeout));
 
     cpu_t *cpu_list = data->ctx->cpus;
-    // pcm_t *pcm = data->pcm;
-    // power_ipc_list_t *ipc_list = data->list;
 
     set_power(0, cpu_list[0].initial_power_limit);
     set_power(1, cpu_list[1].initial_power_limit);
@@ -188,9 +192,7 @@ void *client_thread(void *args)
 
     while (!data->ctx->dying)
     {
-        // pcm->pcm_c_start();
         sleep(frequency);
-        // pcm->pcm_c_stop();
 
         frequency = DEFAULT_FREQUENCY;
         double nowtime = get_power_reading(power_ctx, cpu_list);
@@ -203,20 +205,6 @@ void *client_thread(void *args)
                 break;
             }
             
-	        // int lcore_id = i;
-            // double instrs = (double)pcm->pcm_c_get_instr(lcore_id);
-            // double cycles = (double)pcm->pcm_c_get_cycles(lcore_id);
-            // double ipc = instrs / cycles;
-
-	        // printf("C:%f I:%f, IPC:%3.2f\n",
-            //     instrs,
-            //     cycles,
-            //     ipc);
-
-            // if (ipc <= 0) // unsure if I want to do this
-            //     break;
-            
-            // per socket, file with time, ipc, powercap for graphing
             double ipc = -1.0;
             fprintf(core_files[i], "%f,%f,%f,%f\n", 
                     nowtime, 
@@ -224,7 +212,6 @@ void *client_thread(void *args)
                     cpu_list[i].current_power,
                     cpu_list[i].current_power_limit);
 
-            // insert_node(cpu_list[i].current_power_limit, ipc, ipc_list);
 
             bool exempt_from_release = false;
             #ifdef VERBOSE
@@ -260,7 +247,6 @@ void *client_thread(void *args)
                 printf("Under powercap. extra_power: %f\n", extra_power);
                 #endif
             } 
-            // else if (cpu_list[i].current_power > cpu_list[i].current_power_limit - POWER_MARGIN * 0.5)
             else
             {
                 // need power
@@ -357,17 +343,6 @@ void *client_thread(void *args)
                     #endif
                 }
             }
-            // else
-            // {
-            //     // basically do nothing; stable state. will yield to urgency, nothing else.
-            //     #ifdef VERBOSE
-            //     printf("stable state\n");
-            //     #endif
-            //     pthread_mutex_lock(&cpu_list[i].lock);
-            //     cpu_list[i].urgency = false;
-            //     cpu_list[i].class = 2;
-            //     pthread_mutex_unlock(&cpu_list[i].lock);
-            // }
 
             pthread_mutex_lock(&cpu_list[i].lock);
             if (!exempt_from_release && 
@@ -381,28 +356,6 @@ void *client_thread(void *args)
                 cpu_list[i].available_power += extra_power;
                 cpu_list[i].release_power = false;
 
-                // #ifdef VERBOSE
-                // printf("releasing power\n");
-                // #endif
-                // power_ipc_node_t *lower_level = lookup(cpu_list[i].current_power_limit, ipc_list);
-                // if (lower_level != NULL)
-                // {
-                //     #ifdef VERBOSE
-                //     printf("lookup succeeded\n");
-                //     #endif
-                //     double percent_diff = (ipc - lower_level->ipc) / ipc; 
-                //     if (percent_diff <= 0.05)
-                //     {
-                //         double extra_power = cpu_list[i].current_power_limit - lower_level->powercap;
-                //         cpu_list[i].current_power_limit = cpu_list[i].current_power_limit - extra_power;
-                //         set_power(i, cpu_list[i].current_power_limit);
-                //         cpu_list[i].available_power += extra_power;
-                //         cpu_list[i].release_power = false;
-                //     }
-                //     #ifdef VERBOSE
-                //     printf("power: %f, ipc: %f\n", lower_level->powercap, lower_level->ipc);
-                //     #endif
-                // }
             }
             pthread_mutex_unlock(&cpu_list[i].lock);
         }

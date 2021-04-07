@@ -1,3 +1,9 @@
+/**
+ * Wrapper on top of Intel's RAPL tool. The read_power function uses RAPL to
+ * read the average power consumption over the last 1 second and puts the
+ * reading into a circular buffer. 
+ */
+
 #define _XOPEN_SOURCE 500
 
 #include <stdio.h>
@@ -234,7 +240,6 @@ void *read_power(void *args)
         package2_before = (double)result2 * energy_units;
         gettimeofday(&currentime1, NULL);
 
-        //printf("\nSleeping 1 second\n\n");
         nanosleep(&interval_1s, NULL);
 
         result1 = read_msr(fd1, MSR_PKG_ENERGY_STATUS);
@@ -249,17 +254,12 @@ void *read_power(void *args)
         power2 = ((package2_after - package2_before) / ((currentime2.tv_usec - currentime1.tv_usec) + (currentime2.tv_sec - currentime1.tv_sec) * 1000000)) * 1000000;
 
         power_reading_t current_reading = {nowtime, power1, power2};
+        // lock free data structure: readings are put via gcc atomic builtins
         __atomic_store(&ctx->readings[count], &current_reading, __ATOMIC_SEQ_CST);
-        // printf("%LF %LF %LF\n", ctx->readings[count].nowtime,
-        //                         ctx->readings[count].power1, 
-        //                         ctx->readings[count].power2);
 
-        // count = (count + 1) & (ctx->len - 1);
         count = (count + 1) % ctx->len;
 
         fprintf(file, "%LF,%LF,%LF\n", nowtime, power1, power2);
-        //nanosleep(&interval_100ms, NULL);
-        // printf("\nSleeping 0.1 second\n\n");
         fclose(file);
     }
     return NULL;

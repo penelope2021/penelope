@@ -1,9 +1,7 @@
 CC = gcc
 ODIR = build
-# PCMDIR = /home/cc/penelope/tools/pcm-master/pcm.so
 
 CFLAGS = -std=c99 -Wall
-# LIBS = -lzmq -lpthread -lm -lbsd -latomic -ldl -L$(PCMDIR) -lpcm -Wl,-rpath=$(PCMDIR)
 LIBS = -lzmq -lpthread -lm -lbsd -latomic -ldl
 DEPS = ctx.h power_client.h rapl.h
 

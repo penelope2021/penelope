@@ -1,4 +1,10 @@
 #!/bin/python2
+'''
+This is a modified version of the SLURM server to work in a simulation of large
+scale. It uses the "poll" syscall instead of "select" to allow it to exceed 1024
+simultaneous file descriptors (as it opens one per concurrent request)
+'''
+
 import select
 import socket
 import sys,os
@@ -6,20 +12,22 @@ import Queue
 import math
 import time,datetime
 total_extra_power=0
-# 96 sockets in total
+
+# can keep track of a larger number of clients
 urgent_list= [0] * 10000
 urgent_count=0
 take_power_unit=2
 break_signal = 0
 
 server_ip = str(sys.argv[1])
-power = int(sys.argv[2])
-num_clients = int(sys.argv[3])
+power = int(sys.argv[2]) # how much excess power to expect
+num_clients = int(sys.argv[3]) # number of clients to expect
 
 DEBUG_FLAG = 1
 LOG_FLAG = 1
 
-
+# Flags to keep track of when certain milestones are hit 
+# 25%, 50%, 75%, 100% of excess power 
 start_flag = False
 conv_flag = False
 quar1_flag = False
@@ -31,6 +39,7 @@ start_time = 0
 end_time = 0
 beginning = time.time()
 
+# Defining what the quartile bounds are 
 max_power = num_clients * (power - 30)
 quartile1 = 0.25*max_power
 quartile2 = 0.5*max_power
@@ -101,6 +110,9 @@ while break_signal != 1:
         s = fd_to_socket[fd]
         if flag & (select.POLLIN | select.POLLPRI):
 
+            # This chain of Ifs records the time at which certain power
+            # redistribution quartiles are met. It also prints the time in the
+            # flowing log, for post-processing
             if not start_flag and total_extra_power > 0:
                 start_flag = True
                 start_time = time.time()
@@ -141,13 +153,6 @@ while break_signal != 1:
                 conv_flag = True
                 with open("/home/cc/slurm_ctime_"+str(power), 'a') as f:
                     f.write(str(runtime))
-            # if conv_flag and start_flag and total_extra_power > 0:
-            #     print('resetting ' + str(total_extra_power))
-            #     conv_flag = False
-
-            # if not conv_flag and start_flag and total_extra_power == 0:
-            #     pass
-
 
             if s is server:
                 # A "readable" server socket is ready to accept a connection

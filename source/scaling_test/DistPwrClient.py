@@ -1,16 +1,24 @@
+'''
+This client is modified for the scaling simultion. Rather than reading real
+power, it always returns whatever its cap is. After a configurable amount of
+time has elapsed, it mocks as idle, always returning that it consumes below 30W,
+which is the minimum power cap.
+
+We also add frequency as a configurable parameter. 
+'''
+
 import os,sys,math,subprocess,time,socket,math
 
 powercap=int(float(sys.argv[1]))
-end_time=float(sys.argv[2]) # seconds
+end_time=float(sys.argv[2]) # time in seconds until decider begins "idling"
 server_name=str(sys.argv[3]) # ip address
 client_id=int(sys.argv[4])
-frequency = float(sys.argv[5]) # seconds
+frequency = float(sys.argv[5]) # period (in seconds) for decider iteration
 id_list=[str(2*client_id), str(2*client_id +1)]
 server_address = (server_name, 10000)
 
 cpu_list=[]
 END_signal =0
-# frequency = 0.2
 default_frequency = frequency
 half_frequency = frequency
 power_margin=3
@@ -18,6 +26,11 @@ half_power_margin=1
 return_value=''
 minimum_power_cap=30.0
 
+# Every time we send a message, we log how long it took to receive a response
+# we keep a running sum of these durations (because of the sheer number of
+# request, keeping a list was becoming unweildy)
+# we keep track of the number of messages, and compute the mean turnaround time
+# at the end
 turnaround_time = 0.0
 num_msgs = 0
 start_time = time.time()
@@ -25,15 +38,6 @@ outfile = "/home/cc/slurm_ttime_" + str(client_id)
 ttime_file = open(outfile, 'w')
 
 LOG_FLAG = 1
-# cpu_files = []
-
-# if LOG_FLAG:
-#     LOG_file = open("/home/cc/slurm_output_"+ str(powercap) + "_" + str(client_id), 'w')
-
-# cpu_files.append(open("/home/cc/slurm_core1_"+str(powercap)+".csv", 'w'))
-# cpu_files.append(open("/home/cc/slurm_core2_"+str(powercap)+".csv", 'w'))
-# launch power monitor
-#os.system("sudo /home/cc/PowerShift/tool/RAPL/RaplPowerMonitor &")
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -51,7 +55,9 @@ class cpu:
         self.urgent = 0
         self.whichend=-1
 
-#read last window average power
+# ReadPower now returns either current cap or 26 (sufficiently below the 30W min
+# cap to always be classified as having excess but never lowering below 30). 
+# Returns a value based on how long it has been from launch
 def ReadPower():
     nowtime = time.time()
     if nowtime - start_time > end_time:
@@ -60,7 +66,9 @@ def ReadPower():
         power1, power2 = cpu_list[0].current_power_limit, cpu_list[1].current_power_limit
     return nowtime, power1, power2
 
-
+# Because these are simulated nodes, we cannot actualy make hardware changes. So
+# we keep the API for minimal code difference but remove any actual power
+# capping
 def SetPower(index,power):
     return 
 
@@ -93,11 +101,6 @@ while(END_signal !=1):
             break
         actual_get_power,release_power=0,0
         print nowtime,cpu_list[i].current_power,cpu_list[i].current_power_limit
-
-        # print time, current power, current cap per core
-        # printstr =  str(nowtime) + "," + str(cpu_list[i].current_power) + "," + str(cpu_list[i].current_power_limit) + "\n"
-        # cpu_files[i].write(printstr)
-        # cpu_files[i].flush()
 
         if cpu_list[i].current_power < cpu_list[i].current_power_limit - power_margin:
             #post extra power
@@ -156,7 +159,6 @@ while(END_signal !=1):
                 turnaround_time += runtime
                 num_msgs += 1
                 
-        #elif cpu_list[i].current_power > cpu_list[i].current_power_limit - power_margin * 0.5:
         else:
             #need power
             if cpu_list[i].current_power_limit >= cpu_list[i].initial_power_limit:
@@ -245,36 +247,6 @@ while(END_signal !=1):
                     cpu_list[i].next_power_limit = cpu_list[i].current_power_limit + actual_get_power
                     SetPower(i,cpu_list[i].next_power_limit)
                     cpu_list[i].current_power_limit =cpu_list[i].next_power_limit
-        # else:
-        #     print 'stable state'
-        #     cpu_list[i].urgent=0
-        #     msg ='0'+','+'2'+','+id_list[i]+',0'
-        #     if LOG_FLAG:
-        #         LOG_file.write(str(time.time()) + ' message sent: extra power = 0, urgent flag = 2, current_power = ' + str(cpu_list[i].current_power) + ', current_power_limit = ' + str(cpu_list[i].current_power_limit) + ', initial_power_limit = ' +  str(cpu_list[i].initial_power_limit)+ '\n')
-
-        #     try:
-        #         sock.send(msg)
-        #         return_value = sock.recv(1024)
-        #         actual_get_power=float(return_value.split(',')[0])
-        #         release_power=int(return_value.split(',')[1])
-        #     except:
-        #         sock.close()
-        #         break
-        #     if release_power == 1 and cpu_list[i].current_power_limit  > cpu_list[i].initial_power_limit:
-        #         # return to initital power limit
-        #         available_release_power= cpu_list[i].current_power_limit - cpu_list[i].initial_power_limit
-        #         cpu_list[i].current_power_limit = cpu_list[i].initial_power_limit
-        #         SetPower(i,cpu_list[i].current_power_limit)
-        #         msg =str(available_release_power)+','+'0'+','+id_list[i]+',0'
-        #         #sock.send(msg)
-        #         if LOG_FLAG:
-        #             LOG_file.write('Trying to release power: available_release_power = ' + str(available_release_power)+ '\n')
-        #         try:
-        #             sock.send(msg)
-        #         except:
-        #             sock.close()
-        #             break
-        #         return_value = sock.recv(1024)
 
     if cpu_list[0].urgent ==1 or cpu_list[1].urgent==1:
         frequency = half_frequency

@@ -26,7 +26,6 @@ void *client_thread(void *args);
 double get_power_reading(client_ctx_t *ctx, cpu_t *cpu_list);
 void set_power(int id, double power);
 double calc_extra_power(double current_power_limit, double current_power);
-// power_exchange_msg_t *send_power_request(client_ctx_t *data, void *socket, bool urgency, double necessary_power);
 power_exchange_msg_t *send_power_request(client_ctx_t *data, bool urgency, double necessary_power);
 void *reset_socket(client_ctx_t *data, void *socket);
 
@@ -65,10 +64,13 @@ double max_transaction_amount(double pool_size, double necessary_power)
     }
 }
 
+/**
+ * If before runtime has elapsed (defined as command line param) it returns cap.
+ * Else it returns 26 (at least 1 POWER_MARGIN below the minimum possible cap of
+ * 30W)
+ */
 double get_power_reading(client_ctx_t *ctx, cpu_t *cpu_list)
 {
-    // long double power1 = 0;
-    // long double power2 = 0;
     time_t t = time(NULL);
     long double nowtime = (long double)t;
     printf("%ld\n", (t - ctx->start_time));
@@ -85,6 +87,7 @@ double get_power_reading(client_ctx_t *ctx, cpu_t *cpu_list)
     return (double)nowtime;
 }
 
+// Can't have deciders actually make RAPL calls in simulation
 void set_power(int id, double power)
 {
     // char cmd[BUFSIZ];
@@ -113,7 +116,6 @@ double calc_extra_power(double current_power_limit, double current_power)
         return (current_power_limit - current_power - POWER_MARGIN * 0.5);
 }
 
-// power_exchange_msg_t *send_power_request(client_ctx_t *data, void *sender, bool urgency, double necessary_power)
 power_exchange_msg_t *send_power_request(client_ctx_t *data, bool urgency, double necessary_power)
 {
     void *socket = zmq_socket(data->ctx->context, ZMQ_REQ);
@@ -146,15 +148,11 @@ power_exchange_msg_t *send_power_request(client_ctx_t *data, bool urgency, doubl
 
     if (n == sizeof(request))
     {
-        // int timeout = 1000;
-        // zmq_setsockopt(socket, ZMQ_RCVTIMEO, &timeout, sizeof(timeout));
         zmq_msg_init(&rec_msg);
         int rc2 = zmq_msg_recv(&rec_msg, socket, 0);
         if (rc2 == -1)
         {
             printf("failed to receive response %d, %s\n", rc2, strerror(errno));
-            // socket = reset_socket(data, socket);
-            // rc = zmq_connect(socket, endpoint);
         }
         rc = zmq_disconnect(socket, endpoint); assert(rc == 0);
         zmq_close(socket);
@@ -180,48 +178,30 @@ void *client_thread(void *args)
 {
     sleep(1);
     printf("starting client thread\n");
-    // uint32_t frequency = DEFAULT_FREQUENCY;
 
     client_ctx_t *data = (client_ctx_t *)args;
-    // power_ctx_t *power_ctx = data->power_ctx;
     void *sender = zmq_socket(data->ctx->context, ZMQ_REQ);
     int timeout = 10000;
     zmq_setsockopt(sender, ZMQ_RCVTIMEO, &timeout, sizeof(timeout));
 
     cpu_t *cpu_list = data->ctx->cpus;
-    // pcm_t *pcm = data->pcm;
-    // power_ipc_list_t *ipc_list = data->list;
 
     set_power(0, cpu_list[0].initial_power_limit);
     set_power(1, cpu_list[1].initial_power_limit);
 
-    // char core1_filename[BUFSIZ], core2_filename[BUFSIZ];
-    // sprintf(core1_filename, "/home/cc/penelope_core1_%g_%d.csv", cpu_list[0].initial_power_limit, data->ctx->id);
-    // sprintf(core2_filename, "/home/cc/penelope_core2_%g_%d.csv", cpu_list[0].initial_power_limit, data->ctx->id);
-
-    // FILE *core_files[2];
-    // core_files[0] = fopen(core1_filename, "w");
-    // core_files[1] = fopen(core2_filename, "w");
     char outfilename[BUFSIZ];
     sprintf(outfilename, "/home/cc/penelope_ttime_%d", data->ctx->id);
     FILE *outfile = fopen(outfilename, "w");
 
+    // keep track of server response times and total number of messages to then
+    // print the mean turnaround time at the end of execution
     long unsigned int ttime = 0;
     int num_msgs = 0;
-    // bool done_flags[2] = {false, false};
-    // bool completed = false;
-    // time_t ctime_start = 0;
-
 
     while (!data->ctx->dying)
     {
-        // pcm->pcm_c_start();
         nanosleep(&data->interval, NULL);
-        // sleep(frequency);
-        // pcm->pcm_c_stop();
 
-        // frequency = DEFAULT_FREQUENCY;
-        // double nowtime = get_power_reading(power_ctx, cpu_list);
         get_power_reading(data, cpu_list);
 
         for (int i = 0; i < 2; i++)
@@ -231,30 +211,6 @@ void *client_thread(void *args)
                 break;
             }
             
-	        // int lcore_id = i;
-            // double instrs = (double)pcm->pcm_c_get_instr(lcore_id);
-            // double cycles = (double)pcm->pcm_c_get_cycles(lcore_id);
-            // double ipc = instrs / cycles;
-
-	        // printf("C:%f I:%f, IPC:%3.2f\n",
-            //     instrs,
-            //     cycles,
-            //     ipc);
-
-            // if (ipc <= 0) // unsure if I want to do this
-            //     break;
-            
-            // per socket, file with time, ipc, powercap for graphing
-            //
-            // double ipc = -1.0;
-            // fprintf(core_files[i], "%f,%f,%f,%f\n", 
-            //         nowtime, 
-            //         ipc, 
-            //         cpu_list[i].current_power,
-            //         cpu_list[i].current_power_limit);
-
-            // insert_node(cpu_list[i].current_power_limit, ipc, ipc_list);
-
             bool exempt_from_release = false;
             #ifdef VERBOSE
             printf("power: %f, cap: %f\n", 
@@ -274,8 +230,7 @@ void *client_thread(void *args)
 
                     data->ctx->start_ctime = (struct timeval *)malloc(sizeof(struct timeval));
                     gettimeofday(data->ctx->start_ctime, NULL);
-                    // ctime_start = time(NULL);
-                    printf("starting ctime\n");
+                    printf("starting ctime\n"); // when we release power, it is the instant that we start the "power redistribution" clock
                 }
 
 				struct timeval stop, start;
@@ -288,8 +243,6 @@ void *client_thread(void *args)
                 {
                     cpu_list[i].available_power += extra_power;
                 }
-                // else if (cpu_list[i].available_power == 0)
-                //     done_flags[i] = true;
                 
                 #ifdef VERBOSE
                 printf("Available power (%d): %f\n", i, cpu_list[i].available_power);
@@ -304,22 +257,10 @@ void *client_thread(void *args)
                 ttime += runtime;
                 num_msgs += 1;
 
-                // if (!completed && done_flags[0] && done_flags[1])
-                // {
-                //     time_t current = time(NULL);
-                //     time_t duration = current - ctime_start;
-                //     char fn[BUFSIZ];
-                //     sprintf(fn, "/home/cc/penelope_ctime_%d", data->ctx->id);
-                //     FILE *ctime = fopen(fn, "w");
-                //     fprintf(ctime, "%ld", duration);
-                //     fclose(ctime);
-                //     completed = true;
-                // }
                 #ifdef VERBOSE
                 printf("Under powercap. extra_power: %f\n", extra_power);
                 #endif
             } 
-            // else if (cpu_list[i].current_power > cpu_list[i].current_power_limit - POWER_MARGIN * 0.5)
             else
             {
                 // need power
@@ -349,7 +290,6 @@ void *client_thread(void *args)
                     if (received_power == 0)
                     {
                         // make request
-                        // power_exchange_msg_t *response = send_power_request(data, sender, false, 0);
                         power_exchange_msg_t *response = send_power_request(data, false, 0);
                         received_power = (response != NULL) ? response->power_exchanged : 0;
 						gettimeofday(&stop, NULL);
@@ -404,7 +344,6 @@ void *client_thread(void *args)
                     if (received_power == 0)
                     {
                         // make request
-                        // power_exchange_msg_t *response = send_power_request(data, sender, true, necessary_power);
                         power_exchange_msg_t *response = send_power_request(data, true, necessary_power);
                         received_power = (response != NULL) ? response->power_exchanged : 0;
 						gettimeofday(&stop, NULL);
@@ -420,7 +359,6 @@ void *client_thread(void *args)
 
                     if (received_power < necessary_power)
                     {
-                        // frequency = HALF_FREQUENCY;
                         exempt_from_release = true; // still urgently need power. our urgency overrides
                     }
 					long unsigned int runtime = (stop.tv_sec - start.tv_sec) * 1000000 + stop.tv_usec - start.tv_usec; 
@@ -437,17 +375,6 @@ void *client_thread(void *args)
                     #endif
                 }
             }
-            // else
-            // {
-            //     // basically do nothing; stable state. will yield to urgency, nothing else.
-            //     #ifdef VERBOSE
-            //     printf("stable state\n");
-            //     #endif
-            //     pthread_mutex_lock(&cpu_list[i].lock);
-            //     cpu_list[i].urgency = false;
-            //     cpu_list[i].class = 2;
-            //     pthread_mutex_unlock(&cpu_list[i].lock);
-            // }
 
             pthread_mutex_lock(&cpu_list[i].lock);
             if (!exempt_from_release && 
@@ -460,44 +387,16 @@ void *client_thread(void *args)
                 set_power(i, cpu_list[i].current_power_limit);
                 cpu_list[i].available_power += extra_power;
                 cpu_list[i].release_power = false;
-
-                // #ifdef VERBOSE
-                // printf("releasing power\n");
-                // #endif
-                // power_ipc_node_t *lower_level = lookup(cpu_list[i].current_power_limit, ipc_list);
-                // if (lower_level != NULL)
-                // {
-                //     #ifdef VERBOSE
-                //     printf("lookup succeeded\n");
-                //     #endif
-                //     double percent_diff = (ipc - lower_level->ipc) / ipc; 
-                //     if (percent_diff <= 0.05)
-                //     {
-                //         double extra_power = cpu_list[i].current_power_limit - lower_level->powercap;
-                //         cpu_list[i].current_power_limit = cpu_list[i].current_power_limit - extra_power;
-                //         set_power(i, cpu_list[i].current_power_limit);
-                //         cpu_list[i].available_power += extra_power;
-                //         cpu_list[i].release_power = false;
-                //     }
-                //     #ifdef VERBOSE
-                //     printf("power: %f, ipc: %f\n", lower_level->powercap, lower_level->ipc);
-                //     #endif
-                // }
             }
             pthread_mutex_unlock(&cpu_list[i].lock);
         }
     }
 
-    // char outfilename[BUFSIZ];
-    // sprintf(outfilename, "/home/cc/penelope_ttime_%d", data->ctx->id);
-    // FILE *outfile = fopen(outfilename, "w");
+    // print the 
     long double avg = ((long double)ttime) / ((long double)num_msgs);
     printf("total: %lu, num_msgs:%d, avg: %LF\n", ttime, num_msgs, avg);
-    // fprintf(outfile, "%LF", avg);
     fclose(outfile);
 
-    // fflush(core_files[0]);
-    // fflush(core_files[1]);
     fflush(stdout);
     return NULL;
 }
