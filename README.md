@@ -41,14 +41,13 @@ Benchmark version 3.4
 Directory Structure  
 ----------------------------------------  
 Please see READMEs in each subfolder for more details on that directory and
-files therein
-.  
-├── run       -- Scripts to launch Penelope alongside benchmark on the cluster
-├── tool      -- RAPL wrapper and some other utilities
-├── source    -- Source files
+files therein.  
+
+├── run       -- Scripts to launch Penelope alongside benchmark on the cluster  
+├── tool      -- RAPL wrapper and some other utilities  
+├── source    -- Source files  
 ├── scripts   -- Scripts used to setup our cluster  
 └── data      -- Data collected  
-
 
 How to Run Penelope
 ----------------------------------------  

@@ -1,0 +1,446 @@
+LESSOPEN=| /usr/bin/lesspipe %s
+MAIL=/var/mail/USER
+USER=USER
+SSH_CLIENT=205.208.121.73 60369 22
+SHLVL=3
+OLDPWD=/etc/profile.d
+HOME=/home/USER
+SSH_TTY=/dev/pts/0
+MODULEPATH_modshare=/usr/share/modules/$MODULE_VERSION/modulefiles:1:/etc/environment-modules/modules:1:/usr/share/modules/modulefiles:1:/usr/share/modules/versions:1
+MODULES_CMD=/usr/lib/x86_64-linux-gnu/modulecmd.tcl
+ENV=/usr/share/modules/init/profile.sh
+DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
+LC_TERMINAL_VERSION=3.4.4
+LOGNAME=USER
+_=./collect_environment.sh
+XDG_SESSION_ID=6
+TERM=xterm-256color
+PATH=/home/USER/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/USER/hadoop/bin/:/home/USER/spark/bin:/home/USER/hadoop/bin/:/home/USER/spark/bin:/home/USER/hadoop/bin/:/home/USER/spark/bin:/home/USER/hadoop/bin/:/home/USER/spark/bin
+XDG_RUNTIME_DIR=/run/user/1000
+LANG=C.UTF-8
+LS_COLORS=rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:
+SHELL=/bin/bash
+LESSCLOSE=/usr/bin/lesspipe %s %s
+LC_TERMINAL=iTerm2
+BASH_ENV=/usr/share/modules/init/bash
+JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
+PWD=/home/USER
+LOADEDMODULES=
+SSH_CONNECTION=205.208.121.73 60369 10.140.81.161 22
+XDG_DATA_DIRS=/usr/local/share:/usr/share:/var/lib/snapd/desktop
+HADOOP_HOME=/home/USER/hadoop/
+MODULEPATH=/etc/environment-modules/modules:/usr/share/modules/versions:/usr/share/modules/$MODULE_VERSION/modulefiles:/usr/share/modules/modulefiles
+SPARK_HOME=/home/USER/spark/
+MODULESHOME=/usr/share/modules
++ lsb_release -a
+No LSB modules are available.
+Distributor ID:	Ubuntu
+Description:	Ubuntu 18.04.4 LTS
+Release:	18.04
+Codename:	bionic
++ uname -a
+Linux skylake 4.15.0-135-generic #139-Ubuntu SMP Mon Jan 18 17:38:24 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux
++ lscpu
+Architecture:        x86_64
+CPU op-mode(s):      32-bit, 64-bit
+Byte Order:          Little Endian
+CPU(s):              48
+On-line CPU(s) list: 0-47
+Thread(s) per core:  2
+Core(s) per socket:  12
+Socket(s):           2
+NUMA node(s):        2
+Vendor ID:           GenuineIntel
+CPU family:          6
+Model:               85
+Model name:          Intel(R) Xeon(R) Gold 6126 CPU @ 2.60GHz
+Stepping:            4
+CPU MHz:             1000.530
+CPU max MHz:         3700.0000
+CPU min MHz:         1000.0000
+BogoMIPS:            5200.00
+Virtualization:      VT-x
+L1d cache:           32K
+L1i cache:           32K
+L2 cache:            1024K
+L3 cache:            19712K
+NUMA node0 CPU(s):   0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46
+NUMA node1 CPU(s):   1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47
+Flags:               fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l3 cdp_l3 invpcid_single pti intel_ppin ssbd mba ibrs ibpb stibp tpr_shadow vnmi flexpriority ept vpid fsgsbase tsc_adjust bmi1 hle avx2 smep bmi2 erms invpcid rtm cqm mpx rdt_a avx512f avx512dq rdseed adx smap clflushopt clwb intel_pt avx512cd avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local dtherm ida arat pln pts hwp hwp_act_window hwp_epp hwp_pkg_req pku ospke md_clear flush_l1d
++ cat /proc/meminfo
+MemTotal:       196601896 kB
+MemFree:        193368312 kB
+MemAvailable:   194361568 kB
+Buffers:           32332 kB
+Cached:          2014328 kB
+SwapCached:            0 kB
+Active:           715544 kB
+Inactive:        1406716 kB
+Active(anon):      76096 kB
+Inactive(anon):     1628 kB
+Active(file):     639448 kB
+Inactive(file):  1405088 kB
+Unevictable:           0 kB
+Mlocked:               0 kB
+SwapTotal:             0 kB
+SwapFree:              0 kB
+Dirty:             10488 kB
+Writeback:             0 kB
+AnonPages:         76336 kB
+Mapped:            49000 kB
+Shmem:              2104 kB
+Slab:             527848 kB
+SReclaimable:     217736 kB
+SUnreclaim:       310112 kB
+KernelStack:        9696 kB
+PageTables:         6512 kB
+NFS_Unstable:          0 kB
+Bounce:                0 kB
+WritebackTmp:          0 kB
+CommitLimit:    98300948 kB
+Committed_AS:     582964 kB
+VmallocTotal:   34359738367 kB
+VmallocUsed:           0 kB
+VmallocChunk:          0 kB
+HardwareCorrupted:     0 kB
+AnonHugePages:         0 kB
+ShmemHugePages:        0 kB
+ShmemPmdMapped:        0 kB
+CmaTotal:              0 kB
+CmaFree:               0 kB
+HugePages_Total:       0
+HugePages_Free:        0
+HugePages_Rsvd:        0
+HugePages_Surp:        0
+Hugepagesize:       2048 kB
+DirectMap4k:      579360 kB
+DirectMap2M:     7356416 kB
+DirectMap1G:    193986560 kB
++ inxi -F -c0
+System:    Host: skylake Kernel: 4.15.0-135-generic x86_64 bits: 64 Console: tty 0 Distro: Ubuntu 18.04.4 LTS
+Machine:   Device: server System: Dell product: PowerEdge R740 serial: N/A
+           Mobo: Dell model: 0JM3W2 v: A02 serial: N/A BIOS: Dell v: 1.4.9 date: 06/29/2018
+CPU(s):    2 13 core Intel Xeon Gold 6126s (-MT-MCP-SMP-) cache: 39424 KB
+           clock speeds: max: 3700 MHz 1: 1000 MHz 2: 1000 MHz 3: 1000 MHz 4: 1210 MHz 5: 1000 MHz 6: 1004 MHz
+           7: 1000 MHz 8: 1000 MHz 9: 1000 MHz 10: 1000 MHz 11: 1000 MHz 12: 1000 MHz 13: 1000 MHz 14: 1000 MHz
+           15: 1000 MHz 16: 1000 MHz 17: 1709 MHz 18: 1000 MHz 19: 1001 MHz 20: 1000 MHz 21: 1000 MHz
+           22: 1000 MHz 23: 1031 MHz 24: 1000 MHz 25: 1000 MHz 26: 1000 MHz 27: 1000 MHz 28: 1000 MHz
+           29: 1000 MHz 30: 1000 MHz 31: 1000 MHz 32: 1000 MHz 33: 1000 MHz 34: 1000 MHz 35: 1000 MHz
+           36: 1000 MHz 37: 1000 MHz 38: 1000 MHz 39: 1000 MHz 40: 1000 MHz 41: 1000 MHz 42: 1000 MHz
+           43: 1000 MHz 44: 1000 MHz 45: 1000 MHz 46: 1000 MHz 47: 1301 MHz 48: 1000 MHz
+Graphics:  Card: Matrox Systems Integrated Matrox G200eW3 Graphics Controller
+           Display Server: X.org 1.19.6 driver: mgag200 tty size: 179x78 Advanced Data: N/A out of X
+Network:   Card-1: Intel I350 Gigabit Network Connection driver: igb
+           IF: eno3 state: down mac: 24:6e:96:7d:fe:00
+           Card-2: Intel I350 Gigabit Network Connection driver: igb
+           IF: eno4 state: down mac: 24:6e:96:7d:fe:01
+           Card-3: Intel Ethernet Controller X710 for 10GbE SFP+ driver: i40e
+           IF: eno1 state: up speed: 10000 Mbps duplex: full mac: 24:6e:96:7d:fd:e0
+           Card-4: Intel Ethernet Controller X710 for 10GbE SFP+ driver: i40e
+           IF: eno2 state: down mac: 24:6e:96:7d:fd:e2
+Drives:    HDD Total Size: 240.1GB (4.5% used)
+           ID-1: /dev/sda model: MZ7KM240HMHQ0D3 size: 240.1GB
+Partition: ID-1: / size: 221G used: 10G (5%) fs: ext4 dev: /dev/sda1
+RAID:      No RAID devices: /proc/mdstat, md_mod kernel module present
+Sensors:   None detected - is lm-sensors installed and configured?
+Info:      Processes: 527 Uptime: 1:16 Memory: 1172.9/191994.0MB Init: systemd runlevel: 5
+           Client: Shell (collect_environ) inxi: 2.3.56
++ lsblk -a
+NAME   MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
+loop0    7:0    0         0 loop 
+loop1    7:1    0         0 loop 
+loop2    7:2    0         0 loop 
+loop3    7:3    0         0 loop 
+loop4    7:4    0         0 loop 
+loop5    7:5    0         0 loop 
+loop6    7:6    0         0 loop 
+loop7    7:7    0         0 loop 
+sda      8:0    0 223.6G  0 disk 
+└─sda1   8:1    0 223.6G  0 part /
++ lsscsi -s
+[0:0:0:0]    disk    ATA      MZ7KM240HMHQ0D3  GD53  /dev/sda    240GB
++ module list
+./collect_environment.sh: 17: ./collect_environment.sh: module: not found
++ nvidia-smi
+./collect_environment.sh: 18: ./collect_environment.sh: nvidia-smi: not found
++ lshw -short -quiet -sanitize
++ cat
+WARNING: you should run this program as super-user.
+H/W path         Device  Class          Description
+===================================================
+                         system         Computer
+/0                       bus            Motherboard
+/0/1                     memory         187GiB System memory
+/0/3                     processor      Intel(R) Xeon(R) Gold 6126 CPU @ 2.60GHz
+/0/4                     processor      Intel(R) Xeon(R) Gold 6126 CPU @ 2.60GHz
+/0/100                   bridge         Sky Lake-E DMI3 Registers
+/0/100/5                 generic        Sky Lake-E MM/Vt-d Configuration Registers
+/0/100/5.2               generic        Intel Corporation
+/0/100/5.4               generic        Intel Corporation
+/0/100/8                 generic        Sky Lake-E Ubox Registers
+/0/100/8.1               generic        Sky Lake-E Ubox Registers
+/0/100/8.2               generic        Sky Lake-E Ubox Registers
+/0/100/11                generic        C620 Series Chipset Family MROM 0
+/0/100/11.5              storage        C620 Series Chipset Family SSATA Controller [AHCI mode]
+/0/100/14                bus            C620 Series Chipset Family USB 3.0 xHCI Controller
+/0/100/14.2              generic        C620 Series Chipset Family Thermal Subsystem
+/0/100/16                communication  C620 Series Chipset Family MEI Controller #1
+/0/100/16.1              communication  C620 Series Chipset Family MEI Controller #2
+/0/100/16.4              communication  C620 Series Chipset Family MEI Controller #3
+/0/100/17                storage        C620 Series Chipset Family SATA Controller [AHCI mode]
+/0/100/1c                bridge         C620 Series Chipset Family PCI Express Root Port #1
+/0/100/1c/0      eno3    network        I350 Gigabit Network Connection
+/0/100/1c/0.1    eno4    network        I350 Gigabit Network Connection
+/0/100/1c.4              bridge         C620 Series Chipset Family PCI Express Root Port #5
+/0/100/1c.4/0            bridge         PLDA
+/0/100/1c.4/0/0          display        Integrated Matrox G200eW3 Graphics Controller
+/0/100/1f                bridge         C621 Series Chipset LPC/eSPI Controller
+/0/100/1f.2              memory         Memory controller
+/0/100/1f.4              bus            C620 Series Chipset Family SMBus
+/0/100/1f.5              bus            C620 Series Chipset Family SPI Controller
+/0/2                     bridge         Sky Lake-E PCI Express Root Port C
+/0/2/0           eno1    network        Ethernet Controller X710 for 10GbE SFP+
+/0/2/0.1         eno2    network        Ethernet Controller X710 for 10GbE SFP+
+/0/6                     generic        Intel Corporation
+/0/7                     generic        Sky Lake-E RAS Configuration Registers
+/0/9                     generic        Intel Corporation
+/0/a                     generic        Sky Lake-E CHA Registers
+/0/b                     generic        Sky Lake-E CHA Registers
+/0/c                     generic        Sky Lake-E CHA Registers
+/0/d                     generic        Sky Lake-E CHA Registers
+/0/e                     generic        Sky Lake-E CHA Registers
+/0/f                     generic        Sky Lake-E CHA Registers
+/0/10                    generic        Sky Lake-E CHA Registers
+/0/11                    generic        Sky Lake-E CHA Registers
+/0/12                    generic        Sky Lake-E CHA Registers
+/0/13                    generic        Sky Lake-E CHA Registers
+/0/14                    generic        Sky Lake-E CHA Registers
+/0/15                    generic        Sky Lake-E CHA Registers
+/0/16                    generic        Sky Lake-E CHA Registers
+/0/17                    generic        Sky Lake-E CHA Registers
+/0/18                    generic        Sky Lake-E CHA Registers
+/0/19                    generic        Sky Lake-E CHA Registers
+/0/1a                    generic        Sky Lake-E CHA Registers
+/0/1b                    generic        Sky Lake-E CHA Registers
+/0/1c                    generic        Sky Lake-E CHA Registers
+/0/1d                    generic        Sky Lake-E CHA Registers
+/0/1e                    generic        Sky Lake-E CHA Registers
+/0/1f                    generic        Sky Lake-E CHA Registers
+/0/20                    generic        Sky Lake-E CHA Registers
+/0/21                    generic        Sky Lake-E CHA Registers
+/0/22                    generic        Sky Lake-E CHA Registers
+/0/23                    generic        Sky Lake-E CHA Registers
+/0/24                    generic        Sky Lake-E CHA Registers
+/0/25                    generic        Sky Lake-E CHA Registers
+/0/26                    generic        Sky Lake-E CHA Registers
+/0/27                    generic        Sky Lake-E CHA Registers
+/0/28                    generic        Sky Lake-E CHA Registers
+/0/29                    generic        Sky Lake-E CHA Registers
+/0/2a                    generic        Sky Lake-E CHA Registers
+/0/2b                    generic        Sky Lake-E CHA Registers
+/0/2c                    generic        Sky Lake-E CHA Registers
+/0/2d                    generic        Sky Lake-E CHA Registers
+/0/2e                    generic        Sky Lake-E CHA Registers
+/0/2f                    generic        Sky Lake-E CHA Registers
+/0/30                    generic        Sky Lake-E CHA Registers
+/0/31                    generic        Sky Lake-E CHA Registers
+/0/32                    generic        Sky Lake-E CHA Registers
+/0/33                    generic        Sky Lake-E CHA Registers
+/0/34                    generic        Sky Lake-E CHA Registers
+/0/35                    generic        Sky Lake-E CHA Registers
+/0/36                    generic        Sky Lake-E CHA Registers
+/0/37                    generic        Sky Lake-E CHA Registers
+/0/38                    generic        Sky Lake-E CHA Registers
+/0/39                    generic        Sky Lake-E CHA Registers
+/0/3a                    generic        Sky Lake-E CHA Registers
+/0/3b                    generic        Sky Lake-E CHA Registers
+/0/3c                    generic        Sky Lake-E CHA Registers
+/0/3d                    generic        Sky Lake-E CHA Registers
+/0/3e                    generic        Sky Lake-E CHA Registers
+/0/3f                    generic        Sky Lake-E CHA Registers
+/0/40                    generic        Sky Lake-E CHA Registers
+/0/41                    generic        Sky Lake-E CHA Registers
+/0/42                    generic        Sky Lake-E CHA Registers
+/0/43                    generic        Sky Lake-E CHA Registers
+/0/44                    generic        Sky Lake-E CHA Registers
+/0/45                    generic        Sky Lake-E CHA Registers
+/0/46                    generic        Sky Lake-E PCU Registers
+/0/47                    generic        Sky Lake-E PCU Registers
+/0/48                    generic        Sky Lake-E PCU Registers
+/0/49                    generic        Sky Lake-E PCU Registers
+/0/4a                    generic        Sky Lake-E PCU Registers
+/0/4b                    generic        Sky Lake-E PCU Registers
+/0/4c                    generic        Sky Lake-E PCU Registers
+/0/4d                    generic        Intel Corporation
+/0/4e                    generic        Sky Lake-E RAS Configuration Registers
+/0/4f                    generic        Intel Corporation
+/0/50                    generic        Intel Corporation
+/0/51                    generic        Intel Corporation
+/0/52                    generic        Intel Corporation
+/0/53                    generic        Intel Corporation
+/0/54                    generic        Intel Corporation
+/0/55                    generic        Intel Corporation
+/0/56                    generic        Intel Corporation
+/0/57                    generic        Intel Corporation
+/0/58                    generic        Intel Corporation
+/0/59                    generic        Intel Corporation
+/0/5a                    generic        Intel Corporation
+/0/5b                    generic        Intel Corporation
+/0/5c                    generic        Intel Corporation
+/0/5d                    generic        Intel Corporation
+/0/5e                    generic        Intel Corporation
+/0/5f                    generic        Intel Corporation
+/0/60                    generic        Intel Corporation
+/0/61                    generic        Intel Corporation
+/0/62                    generic        Intel Corporation
+/0/63                    generic        Intel Corporation
+/0/64                    generic        Intel Corporation
+/0/65                    generic        Intel Corporation
+/0/66                    generic        Intel Corporation
+/0/67                    generic        Intel Corporation
+/0/68                    generic        Intel Corporation
+/0/69                    generic        Intel Corporation
+/0/6a                    generic        Intel Corporation
+/0/6b                    generic        Sky Lake-E RAS Configuration Registers
+/0/6c                    generic        Intel Corporation
+/0/6d                    generic        Intel Corporation
+/0/6e                    generic        Intel Corporation
+/0/6f                    generic        Intel Corporation
+/0/70                    generic        Intel Corporation
+/0/71                    generic        Intel Corporation
+/0/72                    generic        Intel Corporation
+/0/73                    generic        Sky Lake-E M3KTI Registers
+/0/74                    generic        Sky Lake-E M3KTI Registers
+/0/75                    generic        Sky Lake-E M3KTI Registers
+/0/76                    generic        Sky Lake-E M3KTI Registers
+/0/77                    generic        Sky Lake-E M3KTI Registers
+/0/78                    generic        Sky Lake-E M2PCI Registers
+/0/79                    generic        Sky Lake-E M2PCI Registers
+/0/7a                    generic        Sky Lake-E M2PCI Registers
+/0/7b                    generic        Sky Lake-E M2PCI Registers
+/0/7c                    generic        Sky Lake-E MM/Vt-d Configuration Registers
+/0/7d                    generic        Intel Corporation
+/0/7e                    generic        Intel Corporation
+/0/7f                    generic        Sky Lake-E Ubox Registers
+/0/80                    generic        Sky Lake-E Ubox Registers
+/0/81                    generic        Sky Lake-E Ubox Registers
+/0/0                     bridge         Sky Lake-E PCI Express Root Port A
+/0/0/0                   storage        MegaRAID SAS-3 3008 [Fury]
+/0/82                    generic        Intel Corporation
+/0/83                    generic        Sky Lake-E RAS Configuration Registers
+/0/84                    generic        Intel Corporation
+/0/85                    generic        Sky Lake-E CHA Registers
+/0/8.1                   generic        Sky Lake-E CHA Registers
+/0/8.2                   generic        Sky Lake-E CHA Registers
+/0/86                    generic        Sky Lake-E CHA Registers
+/0/87                    generic        Sky Lake-E CHA Registers
+/0/88                    generic        Sky Lake-E CHA Registers
+/0/89                    generic        Sky Lake-E CHA Registers
+/0/8a                    generic        Sky Lake-E CHA Registers
+/0/8b                    generic        Sky Lake-E CHA Registers
+/0/8c                    generic        Sky Lake-E CHA Registers
+/0/8d                    generic        Sky Lake-E CHA Registers
+/0/8e                    generic        Sky Lake-E CHA Registers
+/0/8f                    generic        Sky Lake-E CHA Registers
+/0/90                    generic        Sky Lake-E CHA Registers
+/0/91                    generic        Sky Lake-E CHA Registers
+/0/92                    generic        Sky Lake-E CHA Registers
+/0/93                    generic        Sky Lake-E CHA Registers
+/0/94                    generic        Sky Lake-E CHA Registers
+/0/95                    generic        Sky Lake-E CHA Registers
+/0/96                    generic        Sky Lake-E CHA Registers
+/0/97                    generic        Sky Lake-E CHA Registers
+/0/98                    generic        Sky Lake-E CHA Registers
+/0/99                    generic        Sky Lake-E CHA Registers
+/0/9a                    generic        Sky Lake-E CHA Registers
+/0/9b                    generic        Sky Lake-E CHA Registers
+/0/9c                    generic        Sky Lake-E CHA Registers
+/0/9d                    generic        Sky Lake-E CHA Registers
+/0/9e                    generic        Sky Lake-E CHA Registers
+/0/9f                    generic        Sky Lake-E CHA Registers
+/0/a0                    generic        Sky Lake-E CHA Registers
+/0/a1                    generic        Sky Lake-E CHA Registers
+/0/a2                    generic        Sky Lake-E CHA Registers
+/0/a3                    generic        Sky Lake-E CHA Registers
+/0/a4                    generic        Sky Lake-E CHA Registers
+/0/a5                    generic        Sky Lake-E CHA Registers
+/0/a6                    generic        Sky Lake-E CHA Registers
+/0/a7                    generic        Sky Lake-E CHA Registers
+/0/a8                    generic        Sky Lake-E CHA Registers
+/0/a9                    generic        Sky Lake-E CHA Registers
+/0/aa                    generic        Sky Lake-E CHA Registers
+/0/ab                    generic        Sky Lake-E CHA Registers
+/0/ac                    generic        Sky Lake-E CHA Registers
+/0/ad                    generic        Sky Lake-E CHA Registers
+/0/ae                    generic        Sky Lake-E CHA Registers
+/0/af                    generic        Sky Lake-E CHA Registers
+/0/b0                    generic        Sky Lake-E CHA Registers
+/0/b1                    generic        Sky Lake-E CHA Registers
+/0/b2                    generic        Sky Lake-E CHA Registers
+/0/b3                    generic        Sky Lake-E CHA Registers
+/0/b4                    generic        Sky Lake-E CHA Registers
+/0/b5                    generic        Sky Lake-E CHA Registers
+/0/b6                    generic        Sky Lake-E CHA Registers
+/0/b7                    generic        Sky Lake-E CHA Registers
+/0/b8                    generic        Sky Lake-E CHA Registers
+/0/b9                    generic        Sky Lake-E CHA Registers
+/0/ba                    generic        Sky Lake-E CHA Registers
+/0/bb                    generic        Sky Lake-E CHA Registers
+/0/bc                    generic        Sky Lake-E CHA Registers
+/0/bd                    generic        Sky Lake-E CHA Registers
+/0/be                    generic        Sky Lake-E CHA Registers
+/0/bf                    generic        Sky Lake-E PCU Registers
+/0/c0                    generic        Sky Lake-E PCU Registers
+/0/c1                    generic        Sky Lake-E PCU Registers
+/0/c2                    generic        Sky Lake-E PCU Registers
+/0/c3                    generic        Sky Lake-E PCU Registers
+/0/c4                    generic        Sky Lake-E PCU Registers
+/0/c5                    generic        Sky Lake-E PCU Registers
+/0/c6                    generic        Intel Corporation
+/0/c7                    generic        Sky Lake-E RAS Configuration Registers
+/0/c8                    generic        Intel Corporation
+/0/8                     generic        Intel Corporation
+/0/c9                    generic        Intel Corporation
+/0/ca                    generic        Intel Corporation
+/0/cb                    generic        Intel Corporation
+/0/cc                    generic        Intel Corporation
+/0/cd                    generic        Intel Corporation
+/0/ce                    generic        Intel Corporation
+/0/cf                    generic        Intel Corporation
+/0/d0                    generic        Intel Corporation
+/0/d1                    generic        Intel Corporation
+/0/d2                    generic        Intel Corporation
+/0/d3                    generic        Intel Corporation
+/0/d4                    generic        Intel Corporation
+/0/d5                    generic        Intel Corporation
+/0/d6                    generic        Intel Corporation
+/0/d7                    generic        Intel Corporation
+/0/d8                    generic        Intel Corporation
+/0/d9                    generic        Intel Corporation
+/0/da                    generic        Intel Corporation
+/0/db                    generic        Intel Corporation
+/0/dc                    generic        Intel Corporation
+/0/dd                    generic        Intel Corporation
+/0/de                    generic        Intel Corporation
+/0/df                    generic        Intel Corporation
+/0/e0                    generic        Intel Corporation
+/0/e1                    generic        Intel Corporation
+/0/5                     generic        Intel Corporation
+/0/5.2                   generic        Sky Lake-E RAS Configuration Registers
+/0/5.4                   generic        Intel Corporation
+/0/e2                    generic        Intel Corporation
+/0/e3                    generic        Intel Corporation
+/0/e4                    generic        Intel Corporation
+/0/e5                    generic        Intel Corporation
+/0/e6                    generic        Intel Corporation
+/0/e7                    generic        Intel Corporation
+/0/e8                    generic        Sky Lake-E M3KTI Registers
+/0/e9                    generic        Sky Lake-E M3KTI Registers
+/0/ea                    generic        Sky Lake-E M3KTI Registers
+/0/eb                    generic        Sky Lake-E M3KTI Registers
+/0/ec                    generic        Sky Lake-E M3KTI Registers
+/0/ed                    generic        Sky Lake-E M2PCI Registers
+/0/ee                    generic        Sky Lake-E M2PCI Registers
+/0/ef                    generic        Sky Lake-E M2PCI Registers
+/0/f0                    generic        Sky Lake-E M2PCI Registers
+WARNING: output may be incomplete or inaccurate, you should run this program as super-user.
