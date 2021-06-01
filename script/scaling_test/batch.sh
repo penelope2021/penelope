@@ -2,10 +2,9 @@
 
 server=$1
 power=$2
-scale_batch=$3
 
-./batchSlurm.sh $server $power $scale_batch
+./batchSlurm.sh $server $power
 
 sleep 15
 
-./batchPenelope.sh $power $scale_batch
+./batchPenelope.sh $power

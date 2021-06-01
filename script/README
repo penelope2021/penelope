@@ -1,0 +1,56 @@
+tl;dr
+
+1) Copy ssh-key onto server node (to see what "server" means, refer below)
+2) Create hostnames_raw.txt w/in script. It should list all IPs separated by
+newlines, excluding server node's IP
+3) Not strictly necessary but likely necessary. Run script/keyscanNodes.sh until
+the server node is able to keyscan all the nodes in the system.
+4) Run script/setup.sh SERVER_IP, where SERVER_IP is the private (i.e. not
+floating) IP of the server node. 
+
+
+The entire setup is contained within the setup.sh script. This script handles
+copying the proper files to all nodes, ensuring dependencies are met, and that
+each node has the most up to date version of the source code. There are really
+only a few things that must be done manually.
+
+Typically, if I intend to run Penelope on N nodes, I will reserver N+1 (in order
+to evaluate SLURM) and attach the floating IP (chameleon terminology) to that
+node. For the rest of this document, I'll refer to this node as the "server"
+node. Penelope will not utilize this node, but slurm will. 
+
+The first thing to do is copy the ssh key onto the server node (copying to the
+rest of the cluster is handled by scripts). I organized it so that each node,
+when launched, is accessible via this ssh key, and this ssh key also enables
+access to the git repo for penelope, ensuring that only one (1) ssh key is 
+necessary for a node to access everything it needs to. 
+
+After copying the ssh key, you should pull the git repo on the server node,
+adding it to your known hosts when prompted. Next you need to make a file called
+"hostnames_raw.txt" in the script subdirectory within the penelope repo. This
+file should have a list of IP addresses for all the nodes in the system
+(excluding the server node), separated by newlines. The setup script will divide
+these into frontend and backend sets, with each set responsible for running an
+application. 
+
+Then all you (should) need to do is run setup.sh and provide as a commandline
+argument the server nodes private IP. This means not floating, but the internal
+chameleon IP (usually starting with 10 rather than 192 in chameleon's case
+specifically).
+
+In practice what you should do is run script/keyscanNodes.sh until that script
+is able to keyscan all the nodes on the list. You might get errors like node
+unreachable. This is usually due to connections not being warmed up yet on
+chameleon. Run this script a few times until it runs totally cleanly, then
+launch setup.sh.
+
+Additional Notes/Tips:
+
+I have gained some wisdom doing this. Perhaps I can help others.
+
+a) I never liked adding executables, the hostname files, or data files to the
+repo. Be careful when running git add ., since you'll add them. It's annoying
+
+b) There is a clean.sh script, that will, by design, absolutely nuke any running
+process on any node. As a result, I don't call it from scripts intended to run
+applications. But, if something goes wrong, that's your big red button.

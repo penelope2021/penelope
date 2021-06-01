@@ -12,6 +12,7 @@ do
     ssh $hostname "/home/cc/penelope/script/killPowerPool.sh" &
     ssh $hostname "sudo pkill run_npb_app.sh" &
     ssh $hostname "sudo pkill 'D\.x'" &
+    ssh $hostname "killall overhead_test.sh" & 
 done
 
 wait

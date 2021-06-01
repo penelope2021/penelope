@@ -3,20 +3,21 @@ hostfile=/home/cc/penelope/script/hostnames_raw.txt
 
 power=$1
 fe_runtime=1200
-nums=(1 5 10 15 20 24)
-frequency=1000
+
+num=24
+fs=(10 50 100 500 750 1000)
 
 num_nodes=$(cat $hostfile | wc -l)
-for num in ${nums[@]}
+for frequency in ${fs[@]}
 do
     # python3 scalingHostFile.py $num
     ./updateNumNodes.sh $num
     ./startPowerPool.sh $power $fe_runtime $frequency
     echo $num
-    sleep 600
-    ./stopPowerPool.sh
+    # sleep 600
+    # ./stopPowerPool.sh
     n=$(($num * $num_nodes))
-    ofd="penelope_scaling_$n"
+    ofd=penelope_scaling_"$n"_"$frequency"
     ./offload.sh $ofd
     ./resetEnv.sh
 done

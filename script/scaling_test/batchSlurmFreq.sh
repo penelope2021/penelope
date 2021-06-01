@@ -6,10 +6,10 @@ power=$2
 fe_runtime=1200
 num_nodes=$(cat $hostfile | wc -l)
 
-nums=(1 5 10 15 20 24)
-frequency=1
+num=24
+fs=(10 50 100 500 750 1000)
 
-for num in ${nums[@]}
+for frequency in ${fs[@]}
 do
     echo $num
     ./updateNumNodes.sh $num

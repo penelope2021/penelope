@@ -1,0 +1,16 @@
+max.py PATH will condense the data at PATH into csv's that can be plotted.
+
+logs.py -p -s geo PATH will graph the data in PATH (which has been processed by
+max.py already) in bar charts. 
+
+
+All the following scripts process the pmap tests, and take in a PATH that is the
+location of the data. The script will cd internally to that location, since
+initially the scripts were written within those directories.
+
+ctime_scale/ctime_freq.py process redistribution time for either scaling or
+frequency varying tests. ttime_* does the same but for the average turnaround
+time. var.py plots the variance of transaction size for both systems. 
+
+var.py is only configured for the scaling test.
+
